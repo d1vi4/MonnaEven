@@ -200,7 +200,7 @@ export default function App() {
     const isAll = activeCategory === data.categories[0];
     const matchesCategory = isAll || item.category === activeCategory;
     const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                         item.description.toLowerCase().includes(searchQuery.toLowerCase());
+                          item.description.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesCategory && matchesSearch;
   });
 
@@ -367,7 +367,8 @@ export default function App() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 overflow-y-auto bg-black/70 backdrop-blur-md flex flex-col items-center py-6 px-4"
+            /* ИСПРАВЛЕНИЕ: Убрали flex-col и items-center, добавили обычный отступ, чтобы модалка могла прокручиваться */
+            className="fixed inset-0 z-50 overflow-y-auto bg-black/70 backdrop-blur-md pt-10 pb-10 px-4"
             onClick={() => setSelectedItem(null)}
           >
             <motion.div
@@ -375,7 +376,8 @@ export default function App() {
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
               onClick={(e) => e.stopPropagation()}
-              className="bg-white w-full max-w-lg rounded-[2.5rem] overflow-hidden shadow-2xl my-auto"
+              /* ИСПРАВЛЕНИЕ: mx-auto вместо my-auto, чтобы контент не сжимался по центру высоты */
+              className="bg-white w-full max-w-lg rounded-[2.5rem] overflow-hidden shadow-2xl mx-auto relative mb-10"
             >
               <div className="relative h-72 sm:h-96">
                 <img 
@@ -385,7 +387,7 @@ export default function App() {
                 />
                 <button 
                   onClick={() => setSelectedItem(null)}
-                  className="absolute top-6 right-6 bg-white/20 backdrop-blur-lg text-white p-2.5 rounded-full hover:bg-white/40 transition-all border border-white/20"
+                  className="absolute top-6 right-6 bg-black/20 backdrop-blur-lg text-white p-2.5 rounded-full hover:bg-black/40 transition-all border border-white/20"
                 >
                   <X size={24} />
                 </button>
@@ -399,7 +401,8 @@ export default function App() {
                   <div className="text-3xl font-serif font-black text-[#795548] whitespace-nowrap pt-1">{selectedItem.price} ₼</div>
                 </div>
                 <div className="w-16 h-1.5 bg-[#795548]/20 mb-8 rounded-full" />
-                <div className="text-[#3E2723]/80 font-serif italic leading-relaxed text-lg sm:text-xl whitespace-pre-wrap">
+                {/* ИСПРАВЛЕНИЕ: Добавлен break-words, чтобы длинные сплошные тексты переносились */}
+                <div className="text-[#3E2723]/80 font-serif italic leading-relaxed text-lg sm:text-xl whitespace-pre-wrap break-words">
                   {selectedItem.description}
                 </div>
                 <div className="mt-12">
@@ -485,8 +488,9 @@ function AdminPanel({ data, onSave, onClose, language }: { data: AppData, onSave
     setShowAddForm(false);
   };
 
+  /* ИСПРАВЛЕНИЕ: Добавлен window.confirm */
   const deleteItem = (id: string) => {
-    if (!confirm(t.deleteDishPrompt)) return;
+    if (!window.confirm(t.deleteDishPrompt)) return;
     const updatedItems = data.menuItems.filter(i => i.id !== id);
     onSave({ ...data, menuItems: updatedItems });
   };
@@ -498,8 +502,13 @@ function AdminPanel({ data, onSave, onClose, language }: { data: AppData, onSave
     setNewCategory('');
   };
 
+  /* ИСПРАВЛЕНИЕ: Добавлен window.confirm и защита нулевой категории "Все" */
   const deleteCategory = (cat: string) => {
-    if (!confirm(t.deleteCatPrompt(cat))) return;
+    if (data.categories.indexOf(cat) === 0) {
+      alert("Нельзя удалить основную категорию!");
+      return;
+    }
+    if (!window.confirm(t.deleteCatPrompt(cat))) return;
     const updatedCats = data.categories.filter(c => c !== cat);
     const updatedItems = data.menuItems.filter(i => i.category !== cat);
     onSave({ categories: updatedCats, menuItems: updatedItems });
